@@ -4,6 +4,9 @@
 __author__ = "Daulet N."
 __email__ = "daulet.nurmanbetov@gmail.com"
 
+import torch
+import logging
+
 
 def prepare_unpunct_text(text):
     """
@@ -34,3 +37,13 @@ def strip_punct(wrd):
             break
         wrd = wrd[1:]
     return wrd
+
+
+def get_cuda_status():
+    """
+    Returns whether CUDA is available
+    """
+    status = torch.cuda.is_available()
+    logging.info(f"Using CUDA: {status}")
+
+    return status

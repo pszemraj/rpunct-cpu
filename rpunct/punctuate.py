@@ -5,8 +5,11 @@ __author__ = "Daulet N."
 __email__ = "daulet.nurmanbetov@gmail.com"
 
 import logging
+
 from langdetect import detect
 from simpletransformers.ner import NERModel
+
+from rpunct.utils import get_cuda_status
 
 
 class RestorePuncts:
@@ -35,6 +38,7 @@ class RestorePuncts:
             "felflare/bert-restore-punctuation",
             labels=self.valid_labels,
             args={"silent": True, "max_seq_length": 512},
+            has_cuda=get_cuda_status(),
         )
 
     def punctuate(self, text: str, lang: str = ""):
