@@ -32,19 +32,34 @@ def e2e_train():
     print(f"Steps: {steps}; Train details: {tr_details}")
 
 
-def train_model():
+def train_model(
+    model_type: str = "bert",
+    model_name: str = "bert-base-uncased",
+    lazy_loading: bool = True,
+    num_epochs: int = 3,
+    max_seq_length: int = 512,
+    overwrite_output_dir: bool = True,
+):
     """
-    Trains simpletransformers model
+    train_model - train a new NER model
+
+    :param str model_type: the type of model to use, defaults to "bert"
+    :param str model_name: the name of the model to use, defaults to "bert-base-uncased"
+    :param bool lazy_loading: whether to load the model lazily, defaults to True
+    :param int num_epochs: maximum number of epochs to train for, defaults to 3
+    :param int max_seq_length: maximum sequence length, defaults to 512
+    :param bool overwrite_output_dir: whether to overwrite the output directory, defaults to True
+    :return tuple: (steps, train_details)
     """
     # Create a NERModel
     model = NERModel(
-        "bert",
-        "bert-base-uncased",
+        model_type,
+        model_name,
         args={
-            "overwrite_output_dir": True,
-            "num_train_epochs": 3,
-            "max_seq_length": 512,
-            "lazy_loading": True,
+            "overwrite_output_dir": overwrite_output_dir,
+            "num_train_epochs": num_epochs,
+            "max_seq_length": max_seq_length,
+            "lazy_loading": lazy_loading,
         },
         labels=VALID_LABELS,
     )
@@ -62,7 +77,7 @@ def prepare_data():
     token_data = load_datasets(
         ["telp_train_1.txt", "telp_train_2.txt", "telp_train_3.txt", "telp_train_4.txt"]
     )
-    clean_up_labels(token_data, valid_labels)
+    clean_up_labels(token_data, VALID_LABELS)
     eval_set = token_data[-int(len(token_data) * 0.10) :]
     train_set = token_data[: int(len(token_data) * 0.90)]
     create_text_file(train_set, "rpunct_train_set.txt")
