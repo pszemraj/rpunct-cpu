@@ -43,6 +43,8 @@ def train_model(
     """
     train_model - train a new NER model
 
+                See https://simpletransformers.ai/docs/ner-model/ for more details
+
     :param str model_type: the type of model to use, defaults to "bert"
     :param str model_name: the name of the model to use, defaults to "bert-base-uncased"
     :param bool lazy_loading: whether to load the model lazily, defaults to True
