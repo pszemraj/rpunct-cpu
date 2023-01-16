@@ -219,4 +219,4 @@ def run():
 
 if __name__ == "__main__":
     print("Training the model.")
-    e2e_train()
+    run()
