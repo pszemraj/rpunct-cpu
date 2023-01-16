@@ -38,7 +38,7 @@ class RestorePuncts:
             "felflare/bert-restore-punctuation",
             labels=self.valid_labels,
             args={"silent": True, "max_seq_length": 512},
-            has_cuda=get_cuda_status(),
+            use_cuda=get_cuda_status(),
         )
 
     def punctuate(self, text: str, lang: str = ""):
