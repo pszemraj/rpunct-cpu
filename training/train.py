@@ -40,12 +40,6 @@ VALID_LABELS = [
 ]
 
 
-def e2e_train():
-    prepare_data()
-    steps, tr_details = train_model()
-    print(f"Steps: {steps}; Train details: {tr_details}")
-
-
 def train_model(
     model_type: str = "bert",
     model_name: str = "bert-base-uncased",
@@ -77,6 +71,7 @@ def train_model(
             "max_seq_length": max_seq_length,
             "lazy_loading": lazy_loading,
         },
+        use_cuda=torch.cuda.is_available(),
         labels=VALID_LABELS,
     )
 
@@ -155,6 +150,71 @@ def create_text_file(dataset, name):
                 line = tok[1] + " " + tok[2] + "\n"
                 fp.write(line)
             fp.write("\n")
+
+
+def get_parser():
+    parser = argparse.ArgumentParser(
+        description="Train a new NER model using simpletransformers",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "-type",
+        "--model_type",
+        type=str,
+        default=None,
+        help="The type of model to use. Defaults to None and will be inferred from the model name",
+    )
+    parser.add_argument(
+        "-m",
+        "--model_name",
+        type=str,
+        default="bert-base-uncased",
+        help="The name of the model to use. Defaults to 'bert-base-uncased'",
+    )
+    parser.add_argument(
+        "--no_lazy_loading",
+        action="store_true",
+        default=False,
+        help="Do not use lazy loading",
+    )
+    parser.add_argument(
+        "--num_epochs",
+        type=int,
+        default=3,
+        help="Maximum number of epochs to train for. Defaults to 3",
+    )
+    parser.add_argument(
+        "--max_seq_length",
+        type=int,
+        default=512,
+        help="Maximum sequence length. Defaults to 512",
+    )
+    parser.add_argument(
+        "--overwrite_output_dir",
+        type=bool,
+        default=True,
+        help="Whether to overwrite the output directory. Defaults to True",
+    )
+    return parser
+
+
+def e2e_train(args):
+    prepare_data()
+    steps, tr_details = train_model(
+        model_type=args.model_type or infer_model_type(args.model_name),
+        model_name=args.model_name,
+        lazy_loading=args.lazy_loading,
+        num_epochs=args.num_epochs,
+        max_seq_length=args.max_seq_length,
+        overwrite_output_dir=args.overwrite_output_dir,
+    )
+    print(f"Steps: {steps}; Train details: {tr_details}")
+
+
+def run():
+    parser = get_parser()
+    args = parser.parse_args()
+    e2e_train(args)
 
 
 if __name__ == "__main__":
