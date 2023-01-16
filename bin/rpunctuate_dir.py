@@ -133,8 +133,34 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-m",
         "--model",
-        default="bert-base-cased",
+        default="felflare/bert-restore-punctuation",
         help="Name of the model to use",
+    )
+    parser.add_argument(
+        "-type",
+        "--model_type",
+        default=None,
+        help="Type of the model to use (if not specified, will be inferred from the model name)",
+    )
+    parser.add_argument(
+        "-w",
+        "--wrds_per_pred",
+        default=250,
+        type=int,
+        help="Number of words per prediction",
+    )
+    parser.add_argument(
+        "-overlap",
+        "--overlap_wrds",
+        default=30,
+        type=int,
+        help="Number of words to overlap between predictions",
+    )
+    parser.add_argument(
+        "--max_seq_length",
+        default=512,
+        type=int,
+        help="Maximum sequence length for the model",
     )
     parser.add_argument(
         "-n",
@@ -171,7 +197,13 @@ def main(args):
     assert (
         input_dir.is_dir() and input_dir.exists()
     ), f"{input_dir.resolve()} is not a directory or does not exist"
-    rpunct = RestorePuncts()
+    rpunct = RestorePuncts(
+        model_name_or_path=args.model,
+        model_type=args.model_type or infer_model_type(args.model),
+        wrds_per_pred=args.wrds_per_pred,
+        overlap_wrds=args.overlap_wrds,
+        max_seq_length=args.max_seq_length,
+    )
 
     rpunct_out = correct_text(rpunct, input_dir, lowercase_inputs)
     archive_path = create_archive(input_dir=rpunct_out, archive_name=args.archive_name)
