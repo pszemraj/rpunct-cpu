@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-# 💾⚙️🔮
-
+"""
+💾⚙️🔮
+utils.py contains helper functions for the package
+"""
 __author__ = "Daulet N."
 __email__ = "daulet.nurmanbetov@gmail.com"
 
@@ -40,9 +42,7 @@ def strip_punct(wrd):
 
 
 def get_cuda_status():
-    """
-    Returns whether CUDA is available
-    """
+    """helper function to check if CUDA is available & log it"""
     status = torch.cuda.is_available()
     logging.info(f"Using CUDA: {status}")
 
