@@ -5,40 +5,66 @@ __author__ = "Daulet N."
 __email__ = "daulet.nurmanbetov@gmail.com"
 
 import logging
+
 from langdetect import detect
 from simpletransformers.ner import NERModel
+
+from rpunct.utils import get_cuda_status
 
 
 class RestorePuncts:
     def __init__(self, wrds_per_pred=250):
         self.wrds_per_pred = wrds_per_pred
         self.overlap_wrds = 30
-        self.valid_labels = ['OU', 'OO', '.O', '!O', ',O', '.U', '!U', ',U', ':O', ';O', ':U', "'O", '-O', '?O', '?U']
-        self.model = NERModel("bert", "felflare/bert-restore-punctuation", labels=self.valid_labels,
-                              args={"silent": True, "max_seq_length": 512})
+        self.valid_labels = [
+            "OU",
+            "OO",
+            ".O",
+            "!O",
+            ",O",
+            ".U",
+            "!U",
+            ",U",
+            ":O",
+            ";O",
+            ":U",
+            "'O",
+            "-O",
+            "?O",
+            "?U",
+        ]
+        self.model = NERModel(
+            "bert",
+            "felflare/bert-restore-punctuation",
+            labels=self.valid_labels,
+            args={"silent": True, "max_seq_length": 512},
+            use_cuda=get_cuda_status(),
+        )
 
-    def punctuate(self, text: str, lang:str=''):
+    def punctuate(self, text: str, lang: str = ""):
         """
         Performs punctuation restoration on arbitrarily large text.
         Detects if input is not English, if non-English was detected terminates predictions.
         Overrride by supplying `lang='en'`
-        
+
         Args:
             - text (str): Text to punctuate, can be few words to as large as you want.
             - lang (str): Explicit language of input text.
         """
         if not lang and len(text) > 10:
             lang = detect(text)
-        if lang != 'en':
-            raise Exception(F"""Non English text detected. Restore Punctuation works only for English.
+        if lang != "en":
+            raise Exception(
+                f"""Non English text detected. Restore Punctuation works only for English.
             If you are certain the input is English, pass argument lang='en' to this function.
-            Punctuate received: {text}""")
+            Punctuate received: {text}"""
+            )
 
         # plit up large text into bert digestable chunks
         splits = self.split_on_toks(text, self.wrds_per_pred, self.overlap_wrds)
         # predict slices
         # full_preds_lst contains tuple of labels and logits
-        full_preds_lst = [self.predict(i['text']) for i in splits]
+        full_preds_lst = [self.predict(i["text"]) for i in splits]
         # extract predictions, and discard logits
         preds_lst = [i[0][0] for i in full_preds_lst]
         # join text slices
@@ -64,15 +90,15 @@ class RestorePuncts:
         Example output:
         [{...}, {"text": "...", 'start_idx': 31354, 'end_idx': 32648}, {...}]
         """
-        wrds = text.replace('\n', ' ').split(" ")
+        wrds = text.replace("\n", " ").split(" ")
         resp = []
         lst_chunk_idx = 0
         i = 0
 
         while True:
             # words in the chunk and the overlapping portion
-            wrds_len = wrds[(length * i):(length * (i + 1))]
-            wrds_ovlp = wrds[(length * (i + 1)):((length * (i + 1)) + overlap)]
+            wrds_len = wrds[(length * i) : (length * (i + 1))]
+            wrds_ovlp = wrds[(length * (i + 1)) : ((length * (i + 1)) + overlap)]
             wrds_split = wrds_len + wrds_ovlp
 
             # Break loop if no more words
@@ -101,7 +127,7 @@ class RestorePuncts:
         Given a full text and predictions of each slice combines predictions into a single text again.
         Performs validataion wether text was combined correctly
         """
-        split_full_text = full_text.replace('\n', ' ').split(" ")
+        split_full_text = full_text.replace("\n", " ").split(" ")
         split_full_text = [i for i in split_full_text if i]
         split_full_text_len = len(split_full_text)
         output_text = []
@@ -117,12 +143,18 @@ class RestorePuncts:
                 if index == split_full_text_len:
                     break
 
-                if split_full_text[index] == str(list(wrd.keys())[0]) and \
-                        ix <= slice_wrds - 3 and text_slices[-1] != _slice:
+                if (
+                    split_full_text[index] == str(list(wrd.keys())[0])
+                    and ix <= slice_wrds - 3
+                    and text_slices[-1] != _slice
+                ):
                     index += 1
                     pred_item_tuple = list(wrd.items())[0]
                     output_text.append(pred_item_tuple)
-                elif split_full_text[index] == str(list(wrd.keys())[0]) and text_slices[-1] == _slice:
+                elif (
+                    split_full_text[index] == str(list(wrd.keys())[0])
+                    and text_slices[-1] == _slice
+                ):
                     index += 1
                     pred_item_tuple = list(wrd.items())[0]
                     output_text.append(pred_item_tuple)
@@ -157,7 +189,7 @@ class RestorePuncts:
 if __name__ == "__main__":
     punct_model = RestorePuncts()
     # read test file
-    with open('../tests/sample_text.txt', 'r') as fp:
+    with open("../tests/sample_text.txt", "r") as fp:
         test_sample = fp.read()
     # predict text and print
     punctuated = punct_model.punctuate(test_sample)

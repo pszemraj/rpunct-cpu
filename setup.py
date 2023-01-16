@@ -6,10 +6,10 @@ __email__ = "daulet.nurmanbetov@gmail.com"
 
 from setuptools import find_packages, setup
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8", errors="ignore") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r") as fh:
+with open("requirements.txt", "r", encoding="utf-8", errors="ignore") as fh:
     requirements = fh.readlines()
     requirements = [i.strip() for i in requirements]
 

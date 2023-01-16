@@ -1,5 +1,7 @@
-langdetect==1.0.9
-pandas==1.2.4
-simpletransformers==0.61.4
+langdetect>=1.0.9
+pandas>=1.2.4
+setuptools
+simpletransformers>=0.61.5
 six==1.16.0
-torch==1.8.1
+tensorflow_datasets
+torch>=1.8.3
