@@ -42,6 +42,26 @@ def clean_text(text: str, lower: bool, **kwargs) -> str:
     return clean(text, lower=lower, **kwargs)
 
 
+def create_archive(input_dir, archive_name="repunctuated-data") -> Path:
+    """
+    create_archive is a function that creates a zip archive of the corrected text files.
+
+    :param str or Path input_dir: the directory containing the corrected text files
+    :param str archive_name: the name of the archive, defaults to "repunctuated-data"
+
+    :return Path: the path to the archive
+    """
+    input_dir = Path(input_dir)
+    archive_filename = f"rpunctuated-files_{archive_name}.zip"
+    archive_path = input_dir.parent / archive_filename
+    with zipfile.ZipFile(archive_path, mode="w") as zip_file:
+        for f in input_dir.iterdir():
+            zip_file.write(f)
+    logging.info(f"archive saved to {archive_path.resolve()}")
+
+    return archive_path
+
+
 def correct_text(rpunct, input_dir: str or Path, lowercase_inputs=True) -> Path:
     """
     correct_text is a function that corrects the punctuation in a text file.
@@ -78,26 +98,6 @@ def correct_text(rpunct, input_dir: str or Path, lowercase_inputs=True) -> Path:
             fo.write(no_dups_text)
 
     return rpunct_out
-
-
-def create_archive(input_dir, archive_name="repunctuated-data") -> Path:
-    """
-    create_archive is a function that creates a zip archive of the corrected text files.
-
-    :param str or Path input_dir: the directory containing the corrected text files
-    :param str archive_name: the name of the archive, defaults to "repunctuated-data"
-
-    :return Path: the path to the archive
-    """
-    input_dir = Path(input_dir)
-    archive_filename = f"rpunctuated-files_{archive_name}.zip"
-    archive_path = input_dir.parent / archive_filename
-    with zipfile.ZipFile(archive_path, mode="w") as zip_file:
-        for f in input_dir.iterdir():
-            zip_file.write(f)
-    logging.info(f"archive saved to {archive_path.resolve()}")
-
-    return archive_path
 
 
 def get_parser() -> argparse.ArgumentParser:
