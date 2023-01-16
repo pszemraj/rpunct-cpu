@@ -3,6 +3,12 @@ rpunctuate_dir.py is a script that corrects the punctuation in a directory of te
 
 NOTE: running this script requires the following packages:
     clean-text (pip install clean-text)
+
+usage: rpunctuate_dir.py [-h] [-m MODEL] [-type MODEL_TYPE] [-w WRDS_PER_PRED]
+                         [-overlap OVERLAP_WRDS] [--max_seq_length MAX_SEQ_LENGTH]
+                         [-n ARCHIVE_NAME] [--no_lowercase_inputs]
+                         input_dir
+
 """
 import argparse
 import logging
@@ -176,7 +182,7 @@ def get_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "input_dir",
-        required=True,
+        type=str,
         help="Path to directory containing text files to be repunctuated",
     )
     # if no arguments are given, print help
@@ -198,7 +204,7 @@ def main(args):
         input_dir.is_dir() and input_dir.exists()
     ), f"{input_dir.resolve()} is not a directory or does not exist"
     rpunct = RestorePuncts(
-        model_name_or_path=args.model,
+        model_name=args.model,
         model_type=args.model_type or infer_model_type(args.model),
         wrds_per_pred=args.wrds_per_pred,
         overlap_wrds=args.overlap_wrds,
