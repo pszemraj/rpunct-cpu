@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-# 💾⚙️🔮
-
+"""
+💾⚙️🔮
+punctuate.py contains the main class that performs punctuation restoration
+"""
 __author__ = "Daulet N."
 __email__ = "daulet.nurmanbetov@gmail.com"
 
