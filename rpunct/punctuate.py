@@ -7,11 +7,12 @@ __author__ = "Daulet N."
 __email__ = "daulet.nurmanbetov@gmail.com"
 
 import logging
+import shutil
 
 from langdetect import detect
 from simpletransformers.ner import NERModel
 
-from rpunct.utils import get_cuda_status
+from rpunct.utils import get_cuda_status, onnx_availability
 
 
 class RestorePuncts:
@@ -22,6 +23,7 @@ class RestorePuncts:
         wrds_per_pred=250,
         overlap_wrds=30,
         max_seq_length=512,
+        overwrite_output_dir=True,
     ):
         """
 
@@ -35,6 +37,9 @@ class RestorePuncts:
         """
         self.wrds_per_pred = wrds_per_pred
         self.overlap_wrds = overlap_wrds
+        self.model_type = model_type
+        self.model_name = model_name
+
         self.valid_labels = [
             "OU",
             "OO",
@@ -52,13 +57,57 @@ class RestorePuncts:
             "?O",
             "?U",
         ]
+        self.ner_model_args = {
+            "silent": True,
+            "max_seq_length": max_seq_length,
+            "overwrite_output_dir": overwrite_output_dir,
+        }
         self.model = NERModel(
-            model_type,
-            model_name,
+            self.model_type,
+            self.model_name,
             labels=self.valid_labels,
-            args={"silent": True, "max_seq_length": max_seq_length},
+            args=self.ner_model_args,
             use_cuda=get_cuda_status(),
         )
+
+    def convert_to_onnx(
+        self, output_dir: str = "onnx_outputs", remove_local_files: bool = True
+    ):
+        """
+        convert_to_onnx - convert the model to ONNX format for faster inference
+
+           this requires ONNX Runtime to be installed, see
+            https://github.com/onnx/onnx#installation
+            https://onnxruntime.ai/docs/install/#python-installs
+
+
+        :param str output_dir: the output directory to save the ONNX model, defaults to 'onnx_outputs'
+        :param bool remove_local_files: remove the local files after conversion, defaults to True
+        :raises Exception: if ONNX is not installed
+        """
+        if not onnx_availability():
+            raise Exception(
+                "ONNX is not available, please install it first: https://onnxruntime.ai/docs/install/#python-installs"
+            )
+
+        logging.info("Converting model to ONNX format")
+        self.model.convert_to_onnx(output_dir)
+        self.ner_model_args.update({"dynamic_quantize": True})
+
+        # load model using existing model_args and the new dynamic_quantize flag from the previous step
+        self.model = NERModel(
+            self.model_type,
+            output_dir,
+            labels=self.valid_labels,
+            args=self.ner_model_args,
+            use_cuda=get_cuda_status(),
+        )
+
+        if remove_local_files:
+            logging.info("cleaning up onnx export files")
+            shutil.rmtree(output_dir, ignore_errors=True)
+
+        logging.info("ONNX conversion complete")
 
     def punctuate(self, text: str, lang: str = ""):
         """

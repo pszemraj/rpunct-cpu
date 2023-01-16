@@ -47,3 +47,19 @@ def get_cuda_status():
     logging.info(f"Using CUDA: {status}")
 
     return status
+
+
+def onnx_availability():
+    """helper function to check if ONNX Runtime is available & log it"""
+    try:
+        import onnx
+        import onnxruntime
+
+        status = True
+    except ImportError as e:
+        logging.error(f"at least one of ONNX / ONNX Runtime is not available: {e}")
+        status = False
+
+    logging.info(f"Using ONNX Runtime: {status}")
+
+    return status
