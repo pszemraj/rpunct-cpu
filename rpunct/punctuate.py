@@ -13,9 +13,26 @@ from rpunct.utils import get_cuda_status
 
 
 class RestorePuncts:
-    def __init__(self, wrds_per_pred=250):
+    def __init__(
+        self,
+        model_type="bert",
+        model_name="felflare/bert-restore-punctuation",
+        wrds_per_pred=250,
+        overlap_wrds=30,
+        max_seq_length=512,
+    ):
+        """
+
+        RestorePuncts class is the main class that performs punctuation restoration.
+
+        :param str model_type: the type of model to use, defaults to 'bert'
+        :param str model_name: the name of the model to use, defaults to 'felflare/bert-restore-punctuation'
+        :param int wrds_per_pred: the number of words to feed to the model at once, defaults to 250
+        :param int overlap_wrds: overlap between chunks of text, defaults to 30
+        :param int max_seq_length: maximum sequence length for the model, defaults to 512
+        """
         self.wrds_per_pred = wrds_per_pred
-        self.overlap_wrds = 30
+        self.overlap_wrds = overlap_wrds
         self.valid_labels = [
             "OU",
             "OO",
@@ -34,10 +51,10 @@ class RestorePuncts:
             "?U",
         ]
         self.model = NERModel(
-            "bert",
-            "felflare/bert-restore-punctuation",
+            model_type,
+            model_name,
             labels=self.valid_labels,
-            args={"silent": True, "max_seq_length": 512},
+            args={"silent": True, "max_seq_length": max_seq_length},
             use_cuda=get_cuda_status(),
         )
 
