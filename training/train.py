@@ -4,8 +4,22 @@
 __author__ = "Daulet N."
 __email__ = "daulet.nurmanbetov@gmail.com"
 
+import argparse
+from pathlib import Path
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    filename="LOG_training.log",
+    filemode="w",
+    format="%(name)s - %(levelname)s - %(message)s",
+)
+
 import json
 from simpletransformers.ner import NERModel
+import torch
+
+from utils import infer_model_type
 
 VALID_LABELS = [
     "OU",
