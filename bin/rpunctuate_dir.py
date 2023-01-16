@@ -181,6 +181,12 @@ def get_parser() -> argparse.ArgumentParser:
         help="whether to lowercase text when initially read from the input files",
     )
     parser.add_argument(
+        "--onnx",
+        default=False,
+        action="store_true",
+        help="whether to use the onnx version of the model",
+    )
+    parser.add_argument(
         "input_dir",
         type=str,
         help="Path to directory containing text files to be repunctuated",
@@ -210,6 +216,8 @@ def main(args):
         overlap_wrds=args.overlap_wrds,
         max_seq_length=args.max_seq_length,
     )
+    if args.onnx:
+        rpunct.convert_to_onnx()
 
     rpunct_out = correct_text(rpunct, input_dir, lowercase_inputs)
     archive_path = create_archive(input_dir=rpunct_out, archive_name=args.archive_name)
