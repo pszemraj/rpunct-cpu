@@ -20,7 +20,21 @@ A list of improvements (_WIP_) to investigate/implement:
 - [x] get CPU version working & pip installable from this repo
 - [x] add a helper script for running inference (see `bin/rpunctuate_dir.py`)
 - [ ] investigate more modern models (e.g. roberta, distilbert, etc. for better performance & speed)
-- [ ] optimization/quanitization of model for even better performance & speed (_note: this will only be implemented here if the integration with simpletransformers is straightforward_)
+- [ ] optimization/quanitization of model for even better performance & speed
+  - [x] add support for ONNX runtime export and quantization
+
+#### ONNX Runtime
+
+Convert the model to ONNX format:
+
+```python
+from rpunct import RestorePuncts
+rpunct = RestorePuncts()
+rpunct.convert_to_onnx()
+# use rpunct as usual
+```
+
+You can read more about ONNX Runtime [here](https://simpletransformers.ai/docs/tips-and-tricks/#onnx-support-beta)
 
 ---
 
